@@ -1,9 +1,9 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.fold(0) { acc, line ->
-            acc + (line.filter { it.isDigit() }.let {
+        return input.sumOf { line ->
+            line.filter { it.isDigit() }.let {
                 "${it.first()}${it.last()}".toInt()
-            })
+            }
         }
     }
 
@@ -20,7 +20,7 @@ fun main() {
             "nine" to "9"
         )
 
-        return input.fold(0) { acc, line ->
+        return input.sumOf { line ->
             val digits = line.foldIndexed("") { index, digitAcc, c ->
                 if (c.isDigit()) {
                     return@foldIndexed digitAcc + c
@@ -35,9 +35,9 @@ fun main() {
                 digitAcc
             }
 
-            acc + (digits.let {
+            digits.let {
                 "${it.first()}${it.last()}".toInt()
-            })
+            }
         }
     }
 
