@@ -1,6 +1,6 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.fold(0) { acc, line ->
+        return input.sumOf { line ->
             val gameId = line.split(":")[0].split(" ")[1]
             val sets = line.split(":")[1].split(";")
 
@@ -17,17 +17,17 @@ fun main() {
                     }
 
                     if (!isPossible) {
-                        return@fold acc
+                        return@sumOf 0
                     }
                 }
             }
 
-            acc + gameId.toInt()
+            gameId.toInt()
         }
     }
 
     fun part2(input: List<String>): Int {
-        return input.fold(0) { acc, line ->
+        return input.sumOf { line ->
             val sets = line.split(":")[1].split(";")
             val maxColorMap = mutableMapOf<String, Int>()
 
@@ -48,7 +48,7 @@ fun main() {
             val green = maxColorMap.getOrDefault("green", 0)
             val blue = maxColorMap.getOrDefault("blue", 0)
 
-            acc + (red * green * blue)
+            red * green * blue
         }
     }
 
