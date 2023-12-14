@@ -19,3 +19,19 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+/**
+ * Returns the lowest common multiple.
+ */
+fun Long.lcm(b: Long): Long {
+    val larger = if (this > b) this else b
+    val maxLcm = this * b
+    var lcm = larger
+    while (lcm <= maxLcm) {
+        if (lcm % this == 0L && lcm % b == 0L) {
+            return lcm
+        }
+        lcm += larger
+    }
+    return maxLcm
+}
