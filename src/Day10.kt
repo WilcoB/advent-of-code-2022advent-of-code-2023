@@ -75,34 +75,43 @@ fun main() {
         val top = getTile(Coordinates(x = current.coordinates.x, y = current.coordinates.y - 1))
         val bottom = getTile(Coordinates(x = current.coordinates.x, y = current.coordinates.y + 1))
 
-        return when {
+        val tile = when {
             left != previous && current.type.possibleLeft.contains(left?.type?.symbol) -> left!!
             right != previous && current.type.possibleRight.contains(right?.type?.symbol) -> right!!
             top != previous && current.type.possibleTop.contains(top?.type?.symbol) -> top!!
             bottom != previous && current.type.possibleBottom.contains(bottom?.type?.symbol) -> bottom!!
             else -> null
         }
+
+        return tile
     }
 
-    fun List<String>.getLoopTiles(): List<Tile> {
+    fun List<String>.getLoopTiles(): Set<Pair<Int, Tile>> {
         val startTile = determineStartTile()
-        val loopTiles = mutableListOf(startTile)
+        var currentIndex = 1
+        val loopTiles = mutableSetOf(currentIndex++ to startTile)
         var previous: Tile? = null
-        var endOfLoop = false
+        var loopComplete = false
 
-        while (!endOfLoop) {
-            val current = loopTiles.lastOrNull() ?: startTile
-            val connectingTile = getConnectingTile(previous = previous, current = current)
+        while (!loopComplete) {
+            val current = loopTiles.last()
+            val connectingTile = getConnectingTile(previous = previous, current = current.second)
+
             if (connectingTile != null) {
-                loopTiles.add(connectingTile)
+                loopTiles.add(currentIndex to connectingTile)
             } else {
-                endOfLoop = true
+                loopComplete = true
             }
 
-            previous = current
+            previous = current.second
+            currentIndex++
         }
 
         return loopTiles
+    }
+
+    fun Set<Pair<Int, Tile>>.getTile(coordinates: Coordinates): Pair<Int, Tile>? {
+        return this.firstOrNull { it.second.coordinates.x == coordinates.x && it.second.coordinates.y == coordinates.y }
     }
 
     fun part1(input: List<String>): Int {
@@ -110,14 +119,46 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        val loopTiles = input.getLoopTiles()
+        val gridWithLoopOnly =
+            loopTiles.fold(Array(input.size) { CharArray(input[0].length) { '.' } }) { grid, loopTileWithIndex ->
+                val tile = loopTileWithIndex.second
+                grid[tile.coordinates.y][tile.coordinates.x] = tile.type.symbol
+                grid
+            }
+
+        var tilesInLoop = 0
+
+        gridWithLoopOnly.forEachIndexed { y, line ->
+            var crossingCount = 0
+
+            line.forEachIndexed { x, symbol ->
+                val tile = loopTiles.getTile(coordinates = Coordinates(x = x, y = y))
+                val tileBelow = loopTiles.getTile(coordinates = Coordinates(x = x, y = y + 1))
+
+                if (tile != null && tileBelow != null) {
+                    val difference = (if (tile.first == 1) tile.first + loopTiles.size else tile.first) - tileBelow.first
+                    if (difference == 1) {
+                        crossingCount++
+                    } else if (difference == -1) {
+                        crossingCount--
+                    }
+                }
+
+                if (symbol == '.' && crossingCount != 0) {
+                    tilesInLoop++
+                }
+            }
+        }
+
+        return tilesInLoop
     }
 
     val testInputPart1 = readInput("Day10_test1")
     check(part1(testInputPart1) == 8)
 
     val testInputPart2 = readInput("Day10_test2")
-    check(part2(testInputPart2) == 0)
+    check(part2(testInputPart2) == 8)
 
     val input = readInput("Day10")
     part1(input).println()
